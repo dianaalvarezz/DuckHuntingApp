@@ -11,8 +11,8 @@ import android.view.View;
 
 public class GameView extends View
 {
-    public final static int DELTA_TIME = 100;
-    private final int [] TARGETS = {R.drawable.anim_duck0, R.drawable.anim_duck1,
+    public static int DELTA_TIME = 100;
+    private int [] TARGETS = {R.drawable.anim_duck0, R.drawable.anim_duck1,
             R.drawable.anim_duck2, R.drawable.anim_duck1};
     private Paint paint;
     private Bitmap [] ducks;
@@ -24,13 +24,13 @@ public class GameView extends View
     {
         super(context);
         ducks = new Bitmap[TARGETS.length];
-        for(int i = 0; i < ducks.length; i++)
+        for (int i = 0; i < ducks.length; i++)
             ducks[i] =
                     BitmapFactory.decodeResource(getResources(), TARGETS[i]);
         float scale = ((float) width / (ducks[0].getWidth() * 5));
         Rect duckRect = new Rect(0, 0, width / 5,
                 (int) (ducks[0].getHeight() * scale));
-        game = new Game(duckRect, 5, .03f, .2f);
+        game = new Game(duckRect, 15, .03f, .2f);
         game.setDuckSpeed(width * .00003f);
         game.setShotSpeed(width * .0003f);
         game.setDeltaTime(DELTA_TIME);
@@ -61,9 +61,19 @@ public class GameView extends View
                         * (float) Math.sin(game.getCannonAngle()),
                 paint);
 
+        // draw shot
+        if (! game.shotOffScreen())
+            canvas.drawCircle(game.getShotCenter().x,
+                    game.getShotCenter().y, game.getShotRadius(), paint);
+
         // draw animated duck
         duckFrame = (duckFrame + 1) % ducks.length;
-        canvas.drawBitmap(ducks[duckFrame], null, game.getDuckRect(), paint);
+        if (game.isDuckShot())
+            canvas.drawBitmap(ducks[0], null,
+                    game.getDuckRect(), paint);
+        else
+            canvas.drawBitmap(ducks[duckFrame], null,
+                    game.getDuckRect(), paint);
     }
 
     public Game getGame()
